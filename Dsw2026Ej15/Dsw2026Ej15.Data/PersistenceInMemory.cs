@@ -1,4 +1,5 @@
-﻿using Dsw2026Ej15.Domain.Interfaces;
+﻿using Dsw2026Ej15.Domain.Entities;
+using Dsw2026Ej15.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -32,5 +33,15 @@ namespace Dsw2026Ej15.Data
             {
             }
 
+        }
+
+        public Speciality? GetSpecialityById(Guid id)
+        {
+            return _specialities.SingleOrDefault(e => e.Id == id);
+        }
+
+        public void SaveDoctor(Doctor doctor)
+        {
+            _doctors.Add(doctor);
         }
     }
