@@ -1,4 +1,5 @@
-﻿using Dsw2026Ej15.Domain.Entities;
+﻿using Dsw2026Ej15.Data.Dtos;
+using Dsw2026Ej15.Domain.Entities;
 using Dsw2026Ej15.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -44,4 +45,21 @@ namespace Dsw2026Ej15.Data
         {
             _doctors.Add(doctor);
         }
+
+        public IEnumerable<Doctor> GetActiveDoctors()
+        {
+            return _doctors.Where(d => d.IsActive);
+        }
+
+        public Doctor? GetActiveDoctorById(Guid id)
+        {
+            return _doctors.SingleOrDefault(d => d.Id == id && d.IsActive);
+        }
+
+        public void DeactivateDoctor(Guid id)
+        {
+            var doctor = _doctors.Single(d => d.Id == id);
+            doctor.Deactivate();
+        }
+
     }
