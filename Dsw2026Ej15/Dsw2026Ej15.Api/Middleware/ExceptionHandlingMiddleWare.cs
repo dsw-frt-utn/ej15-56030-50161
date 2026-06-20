@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
+using ValidationException = Dsw2026Ej15.Domain.Exceptions.ValidationException;
 
 namespace Dsw2026Ej15.Api.Middleware;
 
