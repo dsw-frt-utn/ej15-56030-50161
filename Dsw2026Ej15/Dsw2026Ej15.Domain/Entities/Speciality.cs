@@ -16,5 +16,8 @@ namespace Dsw2026Ej15.Domain.Entities
 
         }
 
+        protected Speciality() { }
+
     }
+
 }

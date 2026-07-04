@@ -11,56 +11,88 @@ namespace Dsw2026Ej15.Data
 {
     public class PersistenceInMemory : IPersistence
     {
-        private List<Speciality> _specialities = [];
-        private List<Doctor> _doctors = [];
-
+        private readonly List<Speciality> _specialities = [];
+        private readonly List<Doctor> _doctors = [];
         public PersistenceInMemory()
         {
-            LoadSpecialities();
+            InitializeData();
         }
 
-        public void LoadSpecialities()
+        public void InitializeData()
         {
-            try
-            {
-                string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sources", "specialities.json");
-
-                var json = File.ReadAllText(jsonPath);
-                var specialities = JsonSerializer.Deserialize<List<SpecialityDto>>
-                    (json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ?? [];
-                _specialities = [.. specialities.Select(s => new Speciality(s.Name, s.Description, s.Id))];
-            }
-            catch (Exception)
-            {
-            }
-
+            InitializeSpecialities();
+            InitializeDoctors();
         }
 
-        public Speciality? GetSpecialityById(Guid id)
+        private void InitializeSpecialities()
         {
-            return _specialities.SingleOrDefault(e => e.Id == id);
+            var especialidadesData = LoadSpecialities<SpecialityDto>("specialities");
+            if (especialidadesData != null)
+            {
+                foreach (var data in especialidadesData)
+                {
+                    Speciality s = new(data.Name, data.Description, data.Id);
+                    _specialities.Add(s);
+                }
+            }
         }
 
-        public void SaveDoctor(Doctor doctor)
+        private void InitializeDoctors()
+        {
+            var s1 = _specialities.Find(s => s.Name == "Traumatología");
+            var s2 = _specialities.Find(s => s.Name == "Oftalmología");
+            var s3 = _specialities.Find(s => s.Name == "Cardiología");
+            var s4 = _specialities.Find(s => s.Name == "Dermatología");
+
+            Doctor d1 = new("Manuel Peralta", "5296", s1!, Guid.Parse("4ab58e4f-4ad5-7bf5-75e5-5bf42a3f4bf1"));
+            Doctor d2 = new("Ramon Mortadela", "4851", s2!, Guid.Parse("5f68dae2-e7ff-f4a5-9fd1-f4a5ba45b31f"));
+            Doctor d3 = new("Ricardo Cruz", "6982", s3!, Guid.Parse("ab58a6a2-f4a5-f7a5-a81f-7f4b2ad5f637"));
+            Doctor d4 = new("Samuel Ramos", "1475", s4!, Guid.Parse("a4b5afb4-f5be-d7bc-77dc-f4aa223fb6ba"));
+
+            _doctors.Add(d1);
+            _doctors.Add(d2);
+            _doctors.Add(d3);
+            _doctors.Add(d4);
+        }
+
+        private List<T>? LoadSpecialities<T>(string file)
+        {
+            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sources", $"{file}.json");
+            string jsonContent = File.ReadAllText(jsonPath);
+            return JsonSerializer.Deserialize<List<T>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        }
+
+        public async Task<IEnumerable<Doctor>> GetAllDoctors()
+        {
+            return _doctors.Where(d => d.IsActive);
+        }
+        public async Task<Doctor?> GetDoctorById(Guid id)
+        {
+            var doctor = _doctors.Find(d => d.Id == id);
+            if (doctor == null || doctor.IsActive == false)
+            {
+                return null;
+            }
+            return doctor;
+        }
+
+        public async Task<Speciality?> GetSpecialityById(Guid id)
+        {
+            return _specialities.Find(s => s.Id == id);
+        }
+
+        public async Task SaveDoctor(Doctor doctor)
         {
             _doctors.Add(doctor);
         }
 
-        public IEnumerable<Doctor> GetActiveDoctors()
+        public async Task UpdateDoctor(Doctor doctor)
         {
-            return _doctors.Where(d => d.IsActive);
+            var index = _doctors.FindIndex(d => d.Id == doctor.Id);
+            if (index >= 0)
+            {
+                _doctors[index] = doctor;
+            }
         }
-
-        public Doctor? GetActiveDoctorById(Guid id)
-        {
-            return _doctors.SingleOrDefault(d => d.Id == id && d.IsActive);
-        }
-
-        public void DeactivateDoctor(Guid id)
-        {
-            var doctor = _doctors.Single(d => d.Id == id);
-            doctor.Deactivate();
-        }
-
     }
 }
