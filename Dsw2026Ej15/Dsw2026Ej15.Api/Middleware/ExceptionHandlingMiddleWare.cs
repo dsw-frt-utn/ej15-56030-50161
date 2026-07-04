@@ -36,11 +36,6 @@ public class ExceptionHandlingMiddleware
             status = HttpStatusCode.BadRequest;
             message = ve.Message;
         }
-        else if (ex is EntityNotFoundException enfe)
-        {
-            status = HttpStatusCode.NotFound;
-            message = enfe.Message;
-        }
         var result = JsonSerializer.Serialize(new { error = message });
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)status;
