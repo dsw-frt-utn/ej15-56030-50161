@@ -48,7 +48,7 @@ namespace Dsw2026Ej15.Api.Controllers
         {
             var doctor = _persistence.GetActiveDoctorById(id);
             if (doctor is null)
-                throw new ValidationException("No se encuentra el médico o no está activo");
+                return NotFound("No se encuentra el médico o no está activo");
 
             return Ok(DoctorModel.Response.FromEntity(doctor));
         }
@@ -58,7 +58,7 @@ namespace Dsw2026Ej15.Api.Controllers
         {
             var doctor = _persistence.GetActiveDoctorById(id);
             if (doctor is null)
-                throw new ValidationException("No se encuentra el médico o no está activo");
+                return NotFound("No se encuentra el médico o no está activo");
 
             _persistence.DeactivateDoctor(id);
             return NoContent();
