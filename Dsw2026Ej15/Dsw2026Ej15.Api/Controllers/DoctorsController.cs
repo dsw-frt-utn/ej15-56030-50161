@@ -1,78 +1,64 @@
 ﻿using Dsw2026Ej15.Api.Models;
 using Dsw2026Ej15.Domain.Entities;
+using Dsw2026Ej15.Domain.Exceptions;
 using Dsw2026Ej15.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Numerics;
 
 namespace Dsw2026Ej15.Api.Controllers
 {
     public class DoctorsController : AppController
     {
         private readonly IPersistence _persistence;
+
         public DoctorsController(IPersistence persistence)
         {
             _persistence = persistence;
         }
 
-
         [HttpPost("doctors")]
         public IActionResult CreateDoctor(DoctorModel.Request request)
         {
             if (string.IsNullOrWhiteSpace(request.Name))
-            {
                 throw new ValidationException("El nombre es requerido");
-            }
 
             if (string.IsNullOrWhiteSpace(request.LicenseNumber))
-            {
                 throw new ValidationException("La matrícula es requerida");
-            }
 
             var speciality = _persistence.GetSpecialityById(request.SpecialityId);
             if (speciality is null)
-            {
                 throw new ValidationException("La especialidad no existe");
-            }
 
             var doctor = new Doctor(request.Name, request.LicenseNumber, speciality);
             _persistence.SaveDoctor(doctor);
 
-            return Created();
+            return CreatedAtAction(nameof(ReadDoctorById), new { id = doctor.Id }, null);
         }
 
         [HttpGet("doctors")]
-        public IActionResult GetActiveDoctors()
+        public IActionResult ReadActiveDoctors()
         {
-            var doctors = _persistence.GetActiveDoctors()
-                .Select(d => new DoctorModel.Response(d.Name, d.LicenseNumber, d.Speciality!.Name));
+            var response = _persistence.GetActiveDoctors()
+                .Select(DoctorModel.Response.FromEntity);
 
-            return Ok(doctors);
+            return Ok(response);
         }
 
         [HttpGet("doctors/{id}")]
-        public IActionResult GetActiveDoctorById(Guid id)
+        public IActionResult ReadDoctorById(Guid id)
         {
             var doctor = _persistence.GetActiveDoctorById(id);
-
             if (doctor is null)
-            {
-                return NotFound();
-            }
+                return NotFound("No se encuentra el médico o no está activo");
 
-            var response = new DoctorModel.Response(doctor.Name, doctor.LicenseNumber, doctor.Speciality!.Name);
-            return Ok(response);
+            return Ok(DoctorModel.Response.FromEntity(doctor));
         }
 
         [HttpDelete("doctors/{id}")]
         public IActionResult DeactivateDoctor(Guid id)
         {
             var doctor = _persistence.GetActiveDoctorById(id);
-
             if (doctor is null)
-            {
-                return NotFound();
-            }
+                return NotFound("No se encuentra el médico o no está activo");
 
             _persistence.DeactivateDoctor(id);
             return NoContent();
