@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dsw2026Ej15.Api.Controllers
 {
-    [Route("doctors")]
     public class DoctorsController : AppController
     {
         private readonly IPersistence _persistence;
@@ -16,8 +15,8 @@ namespace Dsw2026Ej15.Api.Controllers
         }
 
 
-        [HttpPost()]
-        public async Task <IActionResult> CreateDoctor(DoctorModel.Request request)
+        [HttpPost("doctors")]
+        public async Task<IActionResult> CreateDoctor(DoctorModel.Request request)
         {
             if (string.IsNullOrWhiteSpace(request.Name)|| string.IsNullOrWhiteSpace(request.LicenseNumber))
             {
@@ -36,7 +35,7 @@ namespace Dsw2026Ej15.Api.Controllers
             return Created();
         }
 
-        [HttpGet()]
+        [HttpGet("doctors")]
         public async Task<IActionResult> GetAllDoctors()
         {
             var doctors = await _persistence.GetAllDoctors();
@@ -45,7 +44,7 @@ namespace Dsw2026Ej15.Api.Controllers
                 d.LicenseNumber, d.Speciality?.Name)));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("doctors/{id}")]
         public async Task<IActionResult> GetDoctorById([FromRoute]Guid id)
         {
             var doctor = (await GetDoctor(id))!;
@@ -53,7 +52,7 @@ namespace Dsw2026Ej15.Api.Controllers
                 doctor.Name, doctor.LicenseNumber, doctor.Speciality?.Name));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("doctors/{id}")]
         public async Task<IActionResult> DeleteDoctor([FromRoute] Guid id)
         {
             var doctor = (await GetDoctor(id))!;

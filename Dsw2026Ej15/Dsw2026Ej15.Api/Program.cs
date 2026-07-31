@@ -35,11 +35,10 @@ namespace Dsw2026Ej15.Api
             }
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-            app.MapGet("/health-check", () => Results.Ok(new { status = "healthy" }));
+            app.UseAuthorization();
 
             app.MapControllers();
-
+            app.MapHealthChecks("/health-check");
             app.Run();
         }
 

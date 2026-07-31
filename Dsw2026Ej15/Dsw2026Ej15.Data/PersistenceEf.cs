@@ -14,17 +14,12 @@ namespace Dsw2026Ej15.Data
 
         public async Task<IEnumerable<Doctor>> GetAllDoctors()
         {
-            return await _context.Doctors
-                .Include(d => d.Speciality)
-                .Where(d => d.IsActive)
-                .ToListAsync();
+            return _context.Doctors.Where(d => d.IsActive);
         }
 
         public async Task<Doctor?> GetDoctorById(Guid id)
         {
-            return await _context.Doctors
-                .Include(d => d.Speciality)
-                .SingleOrDefaultAsync(d => d.Id == id && d.IsActive);
+            return await _context.Doctors.FirstOrDefaultAsync(d => d.Id == id && d.IsActive);
         }
 
         public async Task<Speciality?> GetSpecialityById(Guid id)
@@ -35,7 +30,7 @@ namespace Dsw2026Ej15.Data
 
         public async Task SaveDoctor(Doctor doctor)
         {
-            await _context.Doctors.AddAsync(doctor);
+            _context.Add(doctor);
             await _context.SaveChangesAsync();
         }
 
